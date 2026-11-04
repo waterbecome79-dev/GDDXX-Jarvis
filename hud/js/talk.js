@@ -21,8 +21,6 @@ function speak(text, onEnd) {
 const focusTimers = {};
 function focusPanel(id) { const el = document.getElementById(id); if (!el) return; el.classList.remove('is-focus'); void el.offsetWidth; el.classList.add('is-focus'); clearTimeout(focusTimers[id]); focusTimers[id] = setTimeout(() => el.classList.remove('is-focus'), 6000); if (innerWidth < 900) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 
-let approvalBox = null;
-
 function respond(q) {
   const { cur, next } = schedInfo();
   if (/安排|日程|会议|今天.*(干|做)|几点/.test(q)) {
@@ -91,7 +89,7 @@ $('#mic').addEventListener('click', toggleListen);
 addEventListener('keydown', e => {
   const typing = document.activeElement === input;
   if (e.code === 'Space' && !typing && !e.repeat && !(document.activeElement && /BUTTON/.test(document.activeElement.tagName))) { e.preventDefault(); clearTimeout(clickListen); startListen(); }
-  else if (e.key === 'Escape') { try { speechSynthesis.cancel(); } catch (_) {} clearInterval(typeTimer); clearInterval(listenTimer); clearTimeout(clickListen); if (approvalBox && approvalBox.isConnected) approvalBox.querySelector('.no').click(); setState('idle'); sub.innerHTML = '<span class="who">JARVIS</span>好的，已停止。'; }
+  else if (e.key === 'Escape') { try { speechSynthesis.cancel(); } catch (_) {} clearInterval(typeTimer); clearInterval(listenTimer); clearTimeout(clickListen); setState('idle'); sub.innerHTML = '<span class="who">JARVIS</span>好的，已停止。'; }
   else if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing)) { e.preventDefault(); openTalk(); input.focus(); }
 });
 addEventListener('keyup', e => { if (e.code === 'Space' && state === 'listening' && document.activeElement !== input) stopListen(); });

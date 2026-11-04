@@ -7,9 +7,7 @@
 const SKIN_FONTS = document.createElement('style');
 SKIN_FONTS.textContent = `
 @font-face{font-family:'Michroma';font-weight:400;src:url(vendor/fonts/michroma-latin-400-normal.woff2) format('woff2')}
-@font-face{font-family:'Syncopate';font-weight:400;src:url(vendor/fonts/syncopate-latin-400-normal.woff2) format('woff2')}
 @font-face{font-family:'Syncopate';font-weight:700;src:url(vendor/fonts/syncopate-latin-700-normal.woff2) format('woff2')}
-@font-face{font-family:'JetBrains Mono';font-weight:400;src:url(vendor/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-weight:500;src:url(vendor/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2')}
 #skinBg{position:fixed;inset:0;pointer-events:none;overflow:hidden;transition:opacity .8s}
 body.demo #skinBg{opacity:0}
