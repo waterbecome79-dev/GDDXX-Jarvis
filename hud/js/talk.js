@@ -27,20 +27,24 @@ function respond(q) {
   const { cur, next } = schedInfo();
   if (/安排|日程|会议|今天.*(干|做)|几点/.test(q)) {
     focusPanel('pSched');
+    if (liveTasks == null) return '今天的安排还没同步过来。';
     const left = SCHED.filter((s, i) => i >= (cur >= 0 ? cur : next >= 0 ? next : SCHED.length)).length;
     if (cur >= 0) return `现在是${SCHED[cur][2]}，到 ${SCHED[cur][1]} 结束。今天还剩 ${left} 项安排。`;
     if (next >= 0) return `今天还有 ${left} 项安排。下一项是 ${SCHED[next][0]} 的${SCHED[next][2]}，内容是${SCHED[next][3]}。`;
+    if (!SCHED.length && !TODO.length) return '今天还没有安排。';
     return '今天的安排都结束了。要我帮你把明天的计划排一下吗？';
   }
-  if (/天气|出行|下雨|温度|穿|路况|通勤/.test(q)) { focusPanel('pWeather'); return '上海今天多云，18 度，空气优。明天 16 到 24 度。去张江科学城现在出发大约 32 分钟，路上畅通。'; }
+  if (/天气|出行|下雨|温度|穿|路况|通勤/.test(q)) { focusPanel('pWeather'); if (!wxLive && !tripLive) return '天气和出行还没有数据。'; return '面板上是刚才同步到的天气和出行。'; }
   if (/大脑|任务|学习|复盘|agent/i.test(q)) { focusPanel('pAgents'); return '语音服务没连上，左边的 Agent 面板暂时没有实时数据。'; }
   if (/汇报|总结|进度|工作|完成/.test(q)) {
     focusPanel('pReport');
-    const rest = TASKS.filter(t => t[1] < 100).map(t => t[0].replace(/\s*\(.*\)/, '')).join('、');
-    return `今天 12 项任务完成了 ${done} 项，进度 ${Math.round(done / 12 * 100)}%。还没做完的是${rest}。`;
+    if (liveTasks == null) return '今天的工作汇报还没有数据。';
+    if (!total) return '今天还没有任务。';
+    const rest = liveTasks.filter(t => t[2] !== 'ok').map(t => t[0]).join('、');
+    return `今天 ${total} 项任务完成了 ${done} 项，进度 ${Math.round(done / total * 100)}%。${rest ? '还没做完的是' + rest + '。' : ''}`;
   }
   if (/你好|在吗|贾维斯|jarvis/i.test(q)) return '我在。有什么需要？';
-  return '我在。语音服务还没连上，现在只能演示日程和天气。';
+  return '我在。语音服务还没连上，日程和天气要等它连上才有。';
 }
 
 let busy = false;
