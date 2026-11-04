@@ -2,7 +2,7 @@
 ; Installs per user into %LOCALAPPDATA%\Jarvis (no admin rights). The bundled Python runs app\launch.py, which sets up
 ; packages and speech models on first launch (progress opens in the browser), then the window.
 #ifndef VERSION
-  #define VERSION "2.0.0"
+  #define VERSION "2.0.4"
 #endif
 #ifndef SRC
   #define SRC "..\..\dist\win"
