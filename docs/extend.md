@@ -38,7 +38,7 @@ plugins 文件夹里的模块会被自动发现。重开贾维斯，说 “Hey J
 
 ## 2. 贾维斯自己学会的技能
 
-做不到的事，贾维斯会记到学习清单。你批准后，它的“大脑”（DeepSeek Harness 插件）会在 `~/.jarvis/skills-trial/` 写一个技能文件夹：
+做不到的事，贾维斯会记到学习清单。你批准后，它的“大脑”（DeepSeek Harness 插件）会在 `~/.jarvis/lab/skills-trial/` 写一个技能文件夹：
 `SKILL.md`（说明）+ `tool.py`（`TOOLS` 列表和 `run(name, args)`）+ `test.json`（测试用例），测试通过、你点安装后才进入 `~/.jarvis/skills/`。
 手写技能也是同样的格式。
 
@@ -48,7 +48,7 @@ plugins 文件夹里的模块会被自动发现。重开贾维斯，说 “Hey J
 窗口在 `hud/js/live.js` 的 `ws.onmessage` 里按 `m.type` 分发，加一个 `else if (m.type === 'my_card') ...`，
 界面代码放到 `hud/js/` 里的新文件，并加到 `hud/js/boot.js` 的 `PARTS` 列表（按顺序加载，后面的文件能用前面文件里的变量）。
 
-窗口发给服务的消息：`text`（打字输入）、`interrupt`、`camera`、`brain_*`（大脑窗口）、`llm_*`（接入大脑面板）。
+窗口发给服务的消息：`text`（打字输入）、`interrupt`、`camera`、`listen`（暂停或恢复聆听）、`brain_*`（大脑窗口）、`llm_*`（接入大脑面板）、`earth_*`（地球此刻）、`em_*`（流浪地球计划）、`holo_list` / `holo_show`（3D 拆解库）。
 
 ## 4. 加一套皮肤
 
