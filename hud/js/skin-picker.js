@@ -6,11 +6,10 @@ function applySkin(id, now) {
   try { localStorage.setItem('jarvis.skin', sk.id); } catch (_) {}
   const root = document.documentElement.style;
   for (const [r, v] of Object.entries(sk.roles)) { root.setProperty('--sk-' + r, v); SKC[r] = v; }
-  skinBgBuild(sk.bg);
   skCoreSet(sk.coreKind || null);
   /* three.js colours: ease the core over ~1.2 s so a switch feels like the core changing mood, not a cut */
   const from = { w: U.uSkW.value.toArray(), c: U.uSkC.value.toArray(), n: U.uSkN.value.toArray(), rib: U.uC.value.map(v => v.toArray()), a: U.uA.value.map(v => v.toArray()) };
-  const to = { w: sk.core.warm, c: sk.core.cool, n: sk.core.neb, rib: SK_RIB0.map(c => skMap(c, sk)), a: SK_A0.map(a => [a[0], a[1] * (sk.core.flat ? 0.5 : 1), a[2] * (sk.core.flat || 1), a[3]]) };
+  const to = { w: sk.core.warm, c: sk.core.cool, n: sk.core.neb, rib: SK_RIB0.map(c => skMap(c, sk)), a: SK_A0.map(a => a.slice()) };
   const t0 = performance.now(), dur = now ? 1 : 1200;
   cancelAnimationFrame(SK.anim);
   const lerp = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
@@ -30,20 +29,17 @@ function applySkin(id, now) {
   try { AGENTS.forEach(a => { if (!a.el) return; a.el.style.setProperty('--c', a.c); const r = a.el.querySelector('.ring'); if (r) r.style.color = a.c; }); } catch (_) {}
   skinPickSync();
 }
-/* skins whose centre is still the embedded original stay out of the rotation and picker until they are rewritten */
-const SK_DONE = ['forge', 'neural', 'nebula', 'ion', 'works', 'factory', 'spider', 'ops'];
-const skReady = sk => !sk.coreKind || SK_DONE.includes(sk.coreKind);
-function skinNext(dir = 1) { const L = SKINS.filter(skReady); const i = L.findIndex(k => k.id === SK.id); const sk = L[(i + dir + L.length) % L.length]; applySkin(sk.id); skinToast(sk); }
+function skinNext(dir = 1) { const i = SKINS.findIndex(k => k.id === SK.id); const sk = SKINS[(i + dir + SKINS.length) % SKINS.length]; applySkin(sk.id); skinToast(sk); }
 function skinToast(sk) { let el = $('#skinToast'); if (!el) { el = Object.assign(document.createElement('div'), { id: 'skinToast' }); document.body.appendChild(el); }
   el.textContent = `皮肤 · ${sk.name}  ${sk.en}`; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1600); }
 function skinCommand(m) {
   if (m.id === 'next') return skinNext(1);
   const sk = SKINS.find(k => k.id === m.id || k.name === m.id);
-  if (sk && skReady(sk)) { applySkin(sk.id); skinToast(sk); }
+  if (sk) { applySkin(sk.id); skinToast(sk); }
 }
 /* picker: menu > 皮肤 */
 const skinPick = Object.assign(document.createElement('div'), { id: 'skinPick', hidden: true });
-skinPick.innerHTML = '<div class="hd"><span>皮肤</span><small>按 T 键轮换 · 选择会被记住</small></div>' + SKINS.filter(skReady).map(sk => {
+skinPick.innerHTML = '<div class="hd"><span>皮肤</span><small>按 T 键轮换 · 选择会被记住</small></div>' + SKINS.map(sk => {
   const r = sk.roles;
   return `<button type="button" data-skin="${sk.id}" aria-pressed="false"><span class="sw"><i style="background:rgb(${r.bg})"></i><i style="background:rgb(${r.pri})"></i><i style="background:rgb(${r.acc})"></i><i style="background:rgb(${r.ink0})"></i></span><b>${sk.name}</b><em>${sk.en}</em></button>`;
 }).join('');
@@ -64,5 +60,5 @@ addEventListener('keydown', e => {
   else if (e.key === 'Escape') skinPick.hidden = true;
 });
 window.applySkin = applySkin;
-{ let id = 'jarvis'; try { id = localStorage.getItem('jarvis.skin') || 'jarvis'; } catch (_) {} if (!skReady(SKINS.find(k => k.id === id) || SKINS[0])) id = 'jarvis'; setTimeout(() => applySkin(id, true), 0); }
+{ let id = 'jarvis'; try { id = localStorage.getItem('jarvis.skin') || 'jarvis'; } catch (_) {} setTimeout(() => applySkin(id, true), 0); }
 /* skins>> */
