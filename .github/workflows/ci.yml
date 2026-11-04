@@ -24,6 +24,12 @@ jobs:
       - run: python -m compileall -q jarvis app tests
       - name: brain and onboarding (fake model server)
         run: python tests/test_brain.py
+      - name: pure checks (no desktop, no speech models)
+        run: python tests/test_units.py
+      - name: hologram library and earth-migration add-on
+        run: |
+          python tests/test_holo_library.py
+          python tests/test_earth_migration.py
       - name: every module imports
         run: python -c "import jarvis.service, jarvis.gesture, jarvis.onboard, jarvis.tools as t; print(sorted(t.names()))"
 
@@ -46,8 +52,6 @@ jobs:
         env: {JARVIS_VOICE_MODELS: "${{ github.workspace }}/models"}
       - run: python tests/test_listen_pause.py
         env: {JARVIS_VOICE_MODELS: "${{ github.workspace }}/models", JARVIS_STAY_ON: "1"}
-      - run: python tests/test_holo_library.py
-      - run: python tests/test_earth_migration.py
 
   hud:
     runs-on: ubuntu-latest
