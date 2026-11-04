@@ -15,7 +15,7 @@
 - **长期记忆**：记得聊过什么、做过什么，可以让它记住或忘掉某件事。
 - **声纹**：录一次你的声音，之后只回应你。
 - **全息演示**：机器拆解、星舰发射到回收、Roadster 悬停、Optimus 行走，可以用手势旋转和拆装。自带 7 台机器（猛禽发动机、汽车发动机、变速箱、电机、离心泵、燃气轮机、涡扇），自己加的放进 `~/.jarvis/holo/`，见 [jarvis/holo_samples](jarvis/holo_samples/README.md)。右上角「3D 拆解」把所有能拆的机器列成一面卡片墙，点一下就投影。NVIDIA SimReady 的公开模型可以用 [tools/simready](tools/simready/README.md) 批量转成全息拆解。
-- **地球此刻**：「看看地球上正在发生什么」，地球仪加六张实时卡片：航班（可查航班飞到哪了）、头顶的卫星、地震、台风、全球新闻热点、下一次火箭发射。公开数据源，不用 key；「家」的位置取自导航里存的家，或 config.json 里的 `earth.home`。
+- **地球此刻**：「看看地球上正在发生什么」，地球仪加六张实时卡片：航班（可查航班飞到哪了）、头顶的卫星、地震、台风、全球新闻热点、下一次火箭发射。公开数据源，不用 key。「家」的位置优先用 `config.json` 里的 `earth.home`（要有能读成数字的 `lat` 和 `lon`），否则用导航里存的家或高德按 IP 得到的城市，都没有则用北京并标明是默认。
 - **流浪地球计划**（可选下载）：菜单里的「流浪地球计划」是 [oxomkbk/earth-migration](https://github.com/oxomkbk/earth-migration) 的两部 WebGL 影片（行星发动机、飞出银河）。它是《流浪地球》的同人作品，不随贾维斯附带，第一次打开时点「下载」（约 36 MB），从作者仓库下载并逐个文件核对校验码。也可以说「打开流浪地球」「第二部」「关闭流浪地球」。
 - **8 套皮肤**：每套都有自己的核心动画，跟着贾维斯的听、想、说变化。
 - **插件**（可在设置里关掉）：米家设备控制、高德天气和路线、DeepSeek Harness 做文档和程序、抖音创作者数据。
@@ -51,6 +51,8 @@ python3 app/launch.py       # 打开窗口；语音服务随窗口启动和退�
 
 只想调界面：`cd hud && python3 -m http.server`，浏览器打开即可（没有语音服务时用内置演示回复）。
 
+各设置的形状见 `config.example.json`。用到的项写进 `~/.jarvis/config.json`，把里面的中文说明换成自己的 key 或数字坐标。`reply_lang` 管回答：`en` 是英文语音加中文字幕（默认），`zh` 是中文。`voice_lang` 管听和唤醒用哪套模型，默认 `en`；设成 `zh` 时安装和运行改用中文语音模型（环境变量 `JARVIS_LANG` 同样有效）。`llm.vision_model` 只在 SimReady 批量给零件起名、而主模型不能看图时才需要。
+
 打包：Mac 上 `bash platform/mac/build.sh`，Windows 上 `powershell -File platform\win\build.ps1`（需要 Inno Setup 6）。
 
 ## 在它的基础上改
@@ -61,7 +63,7 @@ python3 app/launch.py       # 打开窗口；语音服务随窗口启动和退�
 
 ```
 jarvis/            语音服务：唤醒、识别、回声消除、合成、大脑、工具
-  plugins/         可选插件：mihome amap harness creator demos
+  plugins/         可选插件：mihome amap harness creator demos earth earth_migration
   platforms/       Mac / Windows 差异：摄像头、手势识别、文字识别、开机启动
 hud/               界面：index.html + css/ + js/（按顺序加载）+ demos/
 app/               启动器、首次安装、窗口、模型清单
