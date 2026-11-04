@@ -473,28 +473,6 @@ def _sun_elev(lat, lon, t):
     return _look(lat, lon, tuple(x * 1.496e8 for x in su), t)[0]
 
 
-def passes(el, lat, lon, t0, hours=48, step=20):
-    out, cur = [], None
-    t = t0
-    while t < t0 + hours * 3600:
-        s = sat_eci(el, t)
-        elev, az = _look(lat, lon, s, t)
-        vis = elev > 10 and _sun_elev(lat, lon, t) < -6 and _sunlit(s, t)
-        if vis:
-            if not cur:
-                cur = {"start": t, "az0": az, "max": elev, "tmax": t}
-            if elev > cur["max"]:
-                cur["max"], cur["tmax"] = elev, t
-            cur["end"], cur["az1"] = t, az
-        elif cur:
-            out.append(cur); cur = None
-        t += step
-    if cur:
-        out.append(cur)
-    return [{"start": round(p["start"] * 1000), "end": round(p["end"] * 1000), "max": round(p["max"]), "tmax": round(p["tmax"] * 1000),
-             "from": dir8(p["az0"]), "to": dir8(p["az1"]), "min": max(1, round((p["end"] - p["start"]) / 60))} for p in out]
-
-
 def _el_of(s):
     ep = s["EPOCH"]
     t = calendar.timegm(time.strptime(ep[:19], "%Y-%m-%dT%H:%M:%S")) + (float("0." + ep[20:]) if len(ep) > 20 else 0)
@@ -669,18 +647,11 @@ def f_quakes():
         log(f"quakes USGS: {type(e).__name__}: {str(e)[:100]}")
     if not srcs:
         raise RuntimeError("no quake feed")
-    # the same quake from both networks: keep the CENC one (Chinese name) when they are within 60 km and 3 minutes
-    q.sort(key=lambda x: 0 if x["src"] != "USGS" else 1)
-    kept = []
     for x in q:
-        if any(abs(x["t"] - y["t"]) < 180000 and km(x["lat"], x["lon"], y["lat"], y["lon"]) < 60 for y in kept):
-            continue
-        kept.append(x)
-    for x in kept:
         x["km"] = round(km(h["lat"], h["lon"], x["lat"], x["lon"]))
-    kept.sort(key=lambda x: -x["t"])
-    near = [x for x in kept if x["km"] <= 1000]
-    return {"count": len(kept), "q": kept, "near": len(near), "big": sum(1 for x in kept if x["m"] >= 5),
+    q.sort(key=lambda x: -x["t"])
+    near = [x for x in q if x["km"] <= 1000]
+    return {"count": len(q), "q": q, "near": len(near), "big": sum(1 for x in q if x["m"] >= 5),
             "home": {k: h[k] for k in ("lat", "lon", "name")}, "src": " + ".join(srcs),
             "note": "过去 24 小时，美国地质调查局全球目录。中国境内 3 级以下的小地震收录不全（中国地震台网的公开接口已停用）"}
 
