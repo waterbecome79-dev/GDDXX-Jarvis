@@ -98,10 +98,6 @@ export function install(ctx) {
 #ew .ew-panel .res{padding:10px 12px;margin-bottom:12px;border:1px solid rgba(var(--sk-acc),.5);border-radius:3px;background:rgba(var(--sk-acc),.06);line-height:1.7}
 #ew .ew-panel .res b{font:400 18px/1.3 var(--f-latin);color:rgb(var(--sk-accl))}
 #ew .ew-panel .res .rt{font-size:15px;color:rgb(var(--sk-hi))}
-#ew .ew-panel .bars{display:flex;align-items:flex-end;gap:2px;height:64px;margin:6px 0 4px}
-#ew .ew-panel .bars i{flex:1;background:rgba(var(--sk-pri),.55);min-height:2px}
-#ew .ew-panel .bars i.g{background:rgb(var(--sk-acc))}#ew .ew-panel .bars i.now{outline:1px solid rgb(var(--sk-hi))}
-#ew .ew-panel .axis{display:flex;justify-content:space-between;font-size:10.5px;color:rgba(var(--sk-ink),.5)}
 #ew .ew-panel{max-height:76vh;overflow-y:auto;scrollbar-width:thin}
 #ew .ew-hint{position:absolute;left:50%;bottom:4.2vh;transform:translateX(-50%);padding:7px 16px;border:1px solid rgba(var(--sk-pri),.35);border-radius:16px;background:rgba(var(--sk-pnl),.6);font-size:12px;letter-spacing:1px;color:rgba(var(--sk-ink),.75);opacity:0;transition:opacity .8s;white-space:nowrap}
 #ew .ew-hint.on{opacity:1}
@@ -384,12 +380,11 @@ export function install(ctx) {
     flights: planePts(16000), track: liveLines(3000, COL.acc, -0.05), route: liveLines(200, COL.acc, -0.3), ring: liveLines(360, [0.36, 0.95, 0.63], -0.05),
     sats: livePts(17000, 0, -0.3), stations: livePts(4, 0, -0.45), stTrack: liveLines(800, COL.acc, -0.3),
     quakes: livePts(3000, 1, -0.02), storms: livePts(40, 1, -0.02), dist: liveLines(600, COL.acc, -0.3),
-    news: livePts(400, 1, -0.02), launch: livePts(16, 1, -0.02), arc: liveLines(160, COL.acc, -0.6),
-    wind: liveLines(6000, COL.hi, -0.02), aurora: livePts(30000, 0, -0.05)
+    news: livePts(400, 1, -0.02), launch: livePts(16, 1, -0.02), arc: liveLines(160, COL.acc, -0.6)
   };
   const LAYER_OF = { flights: ['flights', 'track', 'route', 'ring'], stations: ['sats', 'stations', 'stTrack', 'ring'], quakes: ['quakes', 'ring'], storms: ['storms', 'dist'],
-    news: ['news'], launch: ['launch', 'arc'], wind: ['wind'], aurora: ['aurora'] };
-  const WALL_A = { sats: 0.4, flights: 0.7, track: 0, route: 0, ring: 0, stations: 1, stTrack: 0.35, quakes: 0.9, storms: 1, dist: 0, news: 0.75, launch: 1, arc: 0.8, wind: 0, aurora: 0 };
+    news: ['news'], launch: ['launch', 'arc'] };
+  const WALL_A = { sats: 0.4, flights: 0.7, track: 0, route: 0, ring: 0, stations: 1, stTrack: 0.35, quakes: 0.9, storms: 1, dist: 0, news: 0.75, launch: 1, arc: 0.8 };
   const layerA = Object.fromEntries(Object.keys(L).map(k => [k, 0]));
 
   /* storm glyph: a spinning spiral sprite per storm */
@@ -414,7 +409,6 @@ export function install(ctx) {
   const SAT = { n: 0, c: null, kind: null, at: 0, up: 0, upK: {}, upFlag: null, cur: 0 };   /* every active satellite */
   const SAT_COL = [[0.5, 0.62, 0.82], [0.72, 0.84, 1], [0.72, 0.6, 1], COL.acc, [0.45, 1, 0.65], COL.hi, [1, 0.86, 0.5], [0.45, 0.95, 0.95]];
   const SAT_NAME = ['其他', '星链', '一网', '中国', '导航', '空间站', '同步轨道', '柯伊伯'];
-  const WD = { lats: null, lons: null, g: null, parts: null };   /* wind grid and particles */
 
   function setFlights(m) {
     const p = m.p || [], n = Math.min(L.flights.max, Math.floor(p.length / 5));
@@ -473,14 +467,6 @@ export function install(ctx) {
       pt(i, v); pt(i + 1, w); A.pos.setXYZ(i * 2, v.x, v.y, v.z); A.pos.setXYZ(i * 2 + 1, w.x, w.y, w.z); A.aa.setX(i * 2, 0); A.aa.setX(i * 2 + 1, 0);
     }
     A.pos.needsUpdate = true; A.g.setDrawRange(0, n * 2); A.n = n;
-  }
-  function setAurora(m) {
-    const ov = m.ov || [];
-    setPts('aurora', ov, (x) => { const p = clamp(x[2] / 60, 0, 1); return { lat: x[1], lon: x[0], r: 1.018, c: [0.25 + 0.75 * p * p, 1 - 0.55 * p * p, 0.45 - 0.2 * p], s: 0.9 + 1.6 * p }; });
-  }
-  function setWind(m) {
-    WD.lats = m.lats; WD.lons = m.lons; WD.g = m.g;
-    if (!WD.parts) { WD.parts = []; for (let i = 0; i < L.wind.max; i++) WD.parts.push(spawnWind({})); }
   }
   /* elements -> per-satellite constants (J2 secular rates), so each frame only does Kepler + two rotations */
   function setSats(m) {
@@ -598,8 +584,6 @@ export function install(ctx) {
       else if (k === 'storms') setStorms(m);
       else if (k === 'news') setNews(m);
       else if (k === 'launch') setLaunch(m);
-      else if (k === 'wind') setWind(m);
-      else if (k === 'aurora') setAurora(m);
     } catch (e) { console.warn('earth data', k, e); }
     renderCard(IDX[k]);
     if (ST.mode === 'card' && CARDS[ST.card].k === k) fillFull();
@@ -663,51 +647,23 @@ export function install(ctx) {
       A.pos.needsUpdate = A.aa.needsUpdate = true; A.g.setDrawRange(0, k * 2);
     }
   }
-  /* wind: particles carried by the 10 m wind field (bilinear), drawn as short streaks; time is sped up a lot (labelled) */
-  function windAt(lat, lon) {
-    if (!WD.g) return [0, 0];
-    const la0 = WD.lats[0], dla = WD.lats[1] - WD.lats[0], nla = WD.lats.length, dlo = WD.lons[1] - WD.lons[0], nlo = WD.lons.length;
-    const fi = clamp((lat - la0) / dla, 0, nla - 1.001), fj = (((lon - WD.lons[0]) % 360) + 360) % 360 / dlo;
-    const i0 = Math.floor(fi), j0 = Math.floor(fj) % nlo, j1 = (j0 + 1) % nlo, a = fi - i0, b = fj - Math.floor(fj), i1 = Math.min(nla - 1, i0 + 1);
-    const G = (i, j, c) => WD.g[(i * nlo + j) * 2 + c];
-    const u = (G(i0, j0, 0) * (1 - b) + G(i0, j1, 0) * b) * (1 - a) + (G(i1, j0, 0) * (1 - b) + G(i1, j1, 0) * b) * a;
-    const v = (G(i0, j0, 1) * (1 - b) + G(i0, j1, 1) * b) * (1 - a) + (G(i1, j0, 1) * (1 - b) + G(i1, j1, 1) * b) * a;
-    return [u, v];
-  }
-  function spawnWind(p) { p.lat = Math.asin(Math.random() * 2 - 1) * R2D * 0.92; p.lon = Math.random() * 360 - 180; p.age = Math.random() * 4; p.life = 3 + Math.random() * 4; return p; }
-  const WIND_K = 0.32;     /* degrees per (m/s · s): about 35,000x real speed */
-  function stepWind(dt, count) {
-    const A = L.wind, pos = A.pos.array, aa = A.aa.array, v = new THREE.Vector3(), w = new THREE.Vector3(); let k = 0;
-    for (let i = 0; i < count; i++) {
-      const p = WD.parts[i]; p.age += dt;
-      if (p.age > p.life || Math.abs(p.lat) > 80) spawnWind(p);
-      const [u, vv] = windAt(p.lat, p.lon), sp = Math.hypot(u, vv);
-      const c = Math.max(0.2, Math.cos(p.lat * D2R));
-      p.lat += vv * WIND_K * dt; p.lon += u * WIND_K * dt / c; if (p.lon > 180) p.lon -= 360; if (p.lon < -180) p.lon += 360;
-      ll(p.lat, p.lon, 1.008, v); ll(p.lat - vv * WIND_K * 0.7, p.lon - u * WIND_K * 0.7 / c, 1.008, w);
-      const fade = Math.min(1, p.age * 2, (p.life - p.age) * 2), a = fade * clamp(0.25 + sp / 12, 0.25, 1);
-      pos.set([v.x, v.y, v.z, w.x, w.y, w.z], k * 6); aa[k * 2] = a; aa[k * 2 + 1] = 0; k++;
-    }
-    A.pos.needsUpdate = A.aa.needsUpdate = true; A.g.setDrawRange(0, k * 2);
-  }
 
   /* ------------------------------------------------------------------ anchors (where each card's line lands) */
   const anchorV = CARDS.map(() => new THREE.Vector3());
   function nearQuake(d) { const n = (d.q || []).filter(x => x.km <= 1000); return n[0] || (d.q || []).slice().sort((a, b) => b.m - a.m)[0]; }
   function anchorLL(k) {
     const d = D[k] || {};
-    if (k === 'flights' || k === 'wind') return [HOME.lat, HOME.lon];
+    if (k === 'flights') return [HOME.lat, HOME.lon];
     if (k === 'stations') return [HOME.lat, HOME.lon];
     if (k === 'quakes') { const q = nearQuake(d); return q ? [q.lat, q.lon] : [HOME.lat, HOME.lon]; }
     if (k === 'storms') return d.s && d.s[0] ? [d.s[0].lat, d.s[0].lon] : [18, 132];
     if (k === 'news') return d.p && d.p[0] ? [d.p[0].lat, d.p[0].lon] : [HOME.lat, HOME.lon];
     if (k === 'launch') return d.l && d.l[0] ? [d.l[0].lat, d.l[0].lon] : [19.6, 110.95];
-    if (k === 'aurora') { const o = (d.ov || []).filter(x => x[1] > 0).sort((a, b) => b[2] - a[2])[0]; return o ? [o[1], o[0]] : [67, HOME.lon]; }
     return [HOME.lat, HOME.lon];
   }
   function anchorOf(i) {
     const k = CARDS[i].k, a = anchorLL(k);
-    return ll(a[0], a[1], k === 'stations' ? 1.07 : k === 'aurora' ? 1.018 : 1.006, anchorV[i]);
+    return ll(a[0], a[1], k === 'stations' ? 1.07 : 1.006, anchorV[i]);
   }
 
   /* ------------------------------------------------------------------ views */
@@ -744,8 +700,6 @@ export function install(ctx) {
     else if (k === 'storms' && d.s && d.s[0]) { const s = d.s[0]; la = (HOME.lat + s.lat) / 2; lo = HOME.lon + ((((s.lon - HOME.lon) + 540) % 360) - 180) / 2; dist = clamp(3.4 + s.km / 1500, 4.0, 6.0); }
     else if (k === 'news') { la = 22; dist = 5.0; }
     else if (k === 'launch' && d.l && d.l[0]) { la = d.l[0].lat + 4; lo = d.l[0].lon + 8; dist = 4.8; }
-    else if (k === 'wind') { dist = 4.4; }
-    else if (k === 'aurora') { la = 55; dist = 4.4; }
     const half = dist * Math.tan(15 * D2R);
     Object.assign(VT, { lat: clamp(la, -70, 75), lon: lo, dist, sx: (cx - 0.5) * 2 * half * asp, sy: -(cy - 0.5) * 2 * half });
   }
@@ -808,16 +762,6 @@ export function install(ctx) {
       const cn = (d.cn || [])[0];
       return { html: countdown(Date.parse(l.net) - Date.now()), sub: `${l.rocket || l.name} · ${shortPlace(l.where)}` + (cn && cn !== l ? ` · 国内下一次 ${dayWord(Date.parse(cn.net))}` : ''), state: st };
     }
-    if (c.k === 'wind') {
-      const lo = d.local || {};
-      const big = lo.text ? lo.text.replace('风', '风 ') : lo.ms != null ? `${lo.ms.toFixed(1)}<small>米/秒</small>` : '—';
-      return { html: `<span style="font-size:.72em">${big}</span>`, sub: `${lo.city || homeName()}${lo.now ? ' · ' + lo.now : ''}${lo.temp != null && lo.temp !== '' ? ' ' + lo.temp + '°C' : ''} · 全球最强 ${d.max ? d.max.ms : '—'} 米/秒`, state: st };
-    }
-    if (c.k === 'aurora') {
-      if (d.kp == null) return { html: '—', wait: true, sub: d.src, state: st };
-      const pk = d.peak ? ` · 3 天内最高 Kp ${d.peak[1].toFixed(1)}` : '';
-      return { html: `<small>Kp</small>${d.kp.toFixed(1)}`, sub: (d.storm ? `${d.storm} 地磁暴` : '没有地磁暴') + pk + ` · 你那里约需 Kp ${d.need}`, state: st };
-    }
     return null;
   }
   function renderCard(i) {
@@ -863,12 +807,12 @@ export function install(ctx) {
     if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
     const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
     const k = CARDS[i].k, d = D[k] || {};
-    const whole = k === 'news' || k === 'wind' || k === 'aurora';
-    const a = whole ? [k === 'aurora' ? 45 : 10, k === 'aurora' ? HOME.lon : 30] : (anchorLL(k) || [HOME.lat, HOME.lon]);
+    const whole = k === 'news';
+    const a = whole ? [10, 30] : (anchorLL(k) || [HOME.lat, HOME.lon]);
     const span = whole ? 360 : k === 'flights' ? 14 : k === 'quakes' ? 30 : k === 'stations' ? 160 : k === 'storms' ? Math.max(40, Math.abs(((d.s && d.s[0] ? d.s[0].lon : HOME.lon) - HOME.lon)) * 2.4) : 110;
     const cx = k === 'stations' ? HOME.lon : k === 'storms' && d.s && d.s[0] ? (HOME.lon + d.s[0].lon) / 2 : a[1];
     const cy = k === 'stations' ? HOME.lat : k === 'storms' && d.s && d.s[0] ? (HOME.lat + d.s[0].lat) / 2 : whole ? a[0] : clamp(a[0], -60, 70);
-    const sc = whole ? Math.max(w / 360, h / 180) * (k === 'aurora' ? 1.6 : 1) : w * 0.62 / span, ox = whole ? w * 0.5 : w * 0.66, oy = h * 0.5;
+    const sc = whole ? Math.max(w / 360, h / 180) : w * 0.62 / span, ox = whole ? w * 0.5 : w * 0.66, oy = h * 0.5;
     const X = (lon) => { let dl = lon - cx; dl = ((dl + 540) % 360) - 180; return ox + dl * sc; }, Y = (lat) => oy - (lat - cy) * sc;
     if (base) {
       x.globalAlpha = 0.85;
@@ -908,17 +852,6 @@ export function install(ctx) {
       const l = d.l[0], px = X(l.lon), py = Y(l.lat), ph = (t * 0.22) % 1;
       x.beginPath(); for (let s = 0; s <= ph; s += 0.02) x.lineTo(px + s * s * w * 0.3, py - Math.sin(s * 1.4) * h * 0.75); x.strokeStyle = acc + '.9)'; x.lineWidth = 1.5; x.stroke();
       dot(px + ph * ph * w * 0.3, py - Math.sin(ph * 1.4) * h * 0.75, 3, hi + '1)'); dot(px, py, 3.2, acc + '1)');
-    } else if (k === 'wind' && WD.g) {
-      x.lineWidth = 1;
-      for (let la = -60; la <= 60; la += 10) for (let lo = -180; lo < 180; lo += 10) {
-        const [u, v] = windAt(la, lo), sp = Math.hypot(u, v); if (sp < 0.5) continue;
-        const px = X(lo), py = Y(la), ph = ((t * 0.6 + (la * 7 + lo) * 0.013) % 1), L2 = 2 + sp * 0.9;
-        x.beginPath(); x.moveTo(px + u / sp * L2 * (ph - 0.5), py - v / sp * L2 * (ph - 0.5)); x.lineTo(px + u / sp * L2 * (ph + 0.2), py - v / sp * L2 * (ph + 0.2));
-        x.strokeStyle = (sp > 10 ? hi : pri) + Math.min(0.95, 0.3 + sp / 14) + ')'; x.stroke(); }
-      homeDot();
-    } else if (k === 'aurora' && d.ov) {
-      d.ov.forEach((o) => { if (o[1] < 20) return; const p = clamp(o[2] / 60, 0, 1); x.fillStyle = `rgba(${80 + 175 * p * p | 0},${255 - 140 * p * p | 0},${120},${0.25 + 0.6 * p})`; x.fillRect(X(o[0]), Y(o[1]), 2, 2); });
-      homeDot();
     }
     x.globalCompositeOperation = 'source-over';
     const sxp = ((t * 0.12 + i * 0.13) % 1) * w; const gr = x.createLinearGradient(sxp - 40, 0, sxp, 0); gr.addColorStop(0, pri + '0)'); gr.addColorStop(1, pri + '.18)');
@@ -985,19 +918,6 @@ export function install(ctx) {
       h = `<h3>NEXT · 下一次</h3><div class="big">${esc(l.rocket || l.name)}</div>` + row('任务', esc(l.mission || l.name)) + row('机构', esc(l.provider)) + row('发射场', `${esc(l.pad)}，${esc(l.where)}`) + row('状态', esc(l.st_cn || l.status) + (l.live ? ' · 正在直播' : l.vid && l.vid.length ? ' · 有官方直播' : ''));
       if (d.cn && d.cn.length) h += `<h3 style="margin-top:14px">CHINA · 国内</h3>` + d.cn.slice(0, 3).map(x => row(`${dayWord(Date.parse(x.net)).replace(/(早上|下午|中午|晚上|凌晨)$/, '')} ${hm(Date.parse(x.net))}`, esc(x.rocket || x.name), esc(shortPlace(x.where)), true)).join('');
       h += `<h3 style="margin-top:14px">AFTER · 之后</h3>` + d.l.filter(x => x !== l).slice(0, 4).map(x => row(`${new Date(Date.parse(x.net)).getMonth() + 1}/${new Date(Date.parse(x.net)).getDate()}`, esc(x.name), esc(shortPlace(x.where)))).join('') + `<div class="note">本机时间。${esc(d.note)}。数据：${esc(d.src)}。</div>`;
-    } else if (c.k === 'wind') {
-      const lo = d.local || {};
-      h = `<h3>YOUR CITY · ${esc(lo.city || homeName())}</h3>` + (lo.text ? row(esc(lo.text), esc(lo.now || ''), lo.temp != null ? lo.temp + '°C' : '') : lo.ms != null ? row(`${lo.ms.toFixed(1)}`, `米/秒 · 从${lo.from}方吹来`, lo.gust != null ? `阵风 ${lo.gust} 米/秒` : '') : '<div class="note">本地风速暂时拿不到。</div>')
-        + `<div class="note" style="margin-top:6px">本地数据：${esc(lo.src || '—')}</div>`
-        + `<h3 style="margin-top:14px">WORLD · 全球</h3>` + (d.max ? row(`${d.max.ms}`, '米/秒 · 此刻网格里最强的风', `${Math.abs(d.max.lat)}°${d.max.lat >= 0 ? 'N' : 'S'} ${Math.abs(d.max.lon)}°${d.max.lon >= 0 ? 'E' : 'W'}`, true) : '')
-        + `<div class="note">${esc(d.note || '')}。流线的方向就是风吹去的方向，越亮越快。</div>`;
-    } else if (c.k === 'aurora' && d.kp != null) {
-      const fc = d.fc || [], mx = 9;
-      h = `<h3>KP · 未来 3 天预报（每 3 小时）</h3><div class="bars">` + fc.map(f => `<i class="${f[1] >= 5 ? 'g' : ''}${Math.abs(f[0] - now) < 5400000 ? ' now' : ''}" style="height:${Math.max(3, f[1] / mx * 100)}%" title="${new Date(f[0]).toLocaleString()} Kp ${f[1]}"></i>`).join('') + `</div>`
-        + (fc.length ? `<div class="axis"><span>${dayWord(fc[0][0])}</span><span>Kp 5 以上 = 地磁暴（橙）</span><span>${dayWord(fc[fc.length - 1][0])}</span></div>` : '')
-        + row(`Kp ${d.kp.toFixed(1)}`, d.storm ? `${d.storm} 地磁暴` : '没有地磁暴', '此刻', !!d.storm)
-        + row(`Kp ${d.need}`, d.need >= 9 ? `${esc(homeName())}（地磁纬度 ${d.gmlat}°）离极光带太远，只有特大磁暴才偶尔看到` : `${esc(homeName())}（地磁纬度 ${d.gmlat}°）大约需要这么强才可能看到`, '', d.peak && d.peak[1] >= d.need)
-        + `<div class="note">地球上的绿光就是 NOAA 模型算出的此刻极光带，越红越强。${esc(d.note || '')}。</div>`;
     }
     panel.innerHTML = h; panel.classList.toggle('low', false);
     const inp = panel.querySelector('.ew-in');
@@ -1164,7 +1084,7 @@ export function install(ctx) {
     const k = CARDS[i].k;
     const HINTS = { flights: '右边输入航班号查它在哪 · 点一架飞机看它的真实航迹 · 拖动旋转、滚轮缩放', stations: '绿色的是此刻在你地平线以上的卫星（虚线圈≈离地 550 公里的星链能被你看到的范围） · 蓝白=星链 · 橙=中国 · 绿=导航 · 黄=同步轨道 · 虚线是两个空间站接下来的路线',
       quakes: '绿色虚线圈是离你 1000 公里 · 点一个地震看详情', storms: '亮线是官方预报路径 · 点台风看强度', news: '红点 = 冲突/负面报道多，蓝点 = 合作/正面 · 点光点看详情',
-      launch: '点发射场看任务', wind: '流线就是风吹去的方向，越亮越快', aurora: '绿色是此刻的极光带，越红越强' };
+      launch: '点发射场看任务' };
     setTimeout(() => showHint(HINTS[k] + ' · 握拳或 Esc 返回'), 1000);
     if (k === 'flights') { if (!(D.flightq && D.flightq.q === ST.flightQ && D.flightq.found)) FL.lock = -1; ringAround(L.ring, HOME.lat, HOME.lon, 300); }
     if (k === 'quakes') ringAround(L.ring, HOME.lat, HOME.lon, 1000);
@@ -1287,17 +1207,16 @@ export function install(ctx) {
     const open_k = ST.mode === 'card' ? CARDS[ST.card].k : null;
     for (const k in L) {
       const mine = open_k && LAYER_OF[open_k].includes(k);
-      const target = !ST.on || ST.ending ? 0 : open_k ? (mine ? 1 : (k === 'wind' || k === 'aurora' ? 0.04 : 0.1)) : WALL_A[k];
+      const target = !ST.on || ST.ending ? 0 : open_k ? (mine ? 1 : 0.1) : WALL_A[k];
       layerA[k] += (target - layerA[k]) * (1 - Math.pow(0.06, dt));
       const m = L[k].m.material; m.uniforms.uAlpha.value = layerA[k] * ap;
-      if (m.uniforms.uScale) m.uniforms.uScale.value = h * (k === 'flights' ? (open_k === 'flights' ? 0.024 : 0.016) : k === 'aurora' ? 0.012 : k === 'stations' ? 0.02 : 0.014) * (mine && k !== 'flights' && k !== 'aurora' ? 1.8 : 1);
+      if (m.uniforms.uScale) m.uniforms.uScale.value = h * (k === 'flights' ? (open_k === 'flights' ? 0.024 : 0.016) : k === 'stations' ? 0.02 : 0.014) * (mine && k !== 'flights' ? 1.8 : 1);
       L[k].m.visible = m.uniforms.uAlpha.value > 0.003;
     }
     stormSprites.forEach(sp => { sp.material.opacity = layerA.storms * ap; sp.material.rotation -= dt * 1.6; const kk = sp.userData.k * (open_k === 'storms' ? 1.6 : 1); sp.scale.set(kk, kk, 1); });
     if (FL.n && (fr % 30 === 0)) stepFlights();
     if (ST2.st.length && fr % 3 === 0) stepStations();
     if (SAT.n && layerA.sats * ap > 0.01) stepSats(Math.ceil(SAT.n / (open_k === 'stations' ? 4 : 10)));   /* each satellite moves every 4-10 frames */
-    if (WD.parts && layerA.wind * ap > 0.01 && (open_k === 'wind' || fr % 2 === 0)) stepWind(Math.min(open_k === 'wind' ? dt : dt * 2, 0.08), open_k === 'wind' ? L.wind.max : 1000);   /* on the wall: fewer streaks, half rate */
     if (L.arc.n) { const ph = (t * 0.25) % 1, a = L.arc.aa.array; for (let j = 0; j < L.arc.n; j++) { const u = j / L.arc.n, v = u < ph ? 0.9 * Math.max(0.15, 1 - (ph - u) * 1.5) : 0; a[j * 2] = a[j * 2 + 1] = v; } L.arc.aa.needsUpdate = true; }
 
     L.flights.m.material.uniforms.uRes.value.set(w, h);
