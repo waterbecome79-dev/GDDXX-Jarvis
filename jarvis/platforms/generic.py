@@ -82,15 +82,3 @@ def ocr(path):
         boxes.append({"t": str(text).strip(), "x": min(xs) / W, "y": min(ys) / H,
                       "w": (max(xs) - min(xs)) / W, "h": (max(ys) - min(ys)) / H})
     return boxes
-
-
-def autostart(on=True):
-    """Linux: an XDG autostart entry."""
-    from pathlib import Path
-    f = Path.home() / ".config" / "autostart" / "jarvis.desktop"
-    if not on:
-        f.unlink(missing_ok=True)
-        return {"ok": True, "on": False}
-    f.parent.mkdir(parents=True, exist_ok=True)
-    f.write_text(f"[Desktop Entry]\nType=Application\nName=Jarvis\nExec={sys.executable} -m app.window\n", encoding="utf-8")
-    return {"ok": True, "on": True}

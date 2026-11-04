@@ -13,5 +13,4 @@
 <key>NSHighResolutionCapable</key><true/>
 <key>NSMicrophoneUsageDescription</key><string>Jarvis listens for "Hey Jarvis". Audio is processed only on this Mac. 贾维斯在本机听唤醒词，声音不会上传。</string>
 <key>NSCameraUsageDescription</key><string>Jarvis watches your hands only while a hologram is on screen. Video stays on this Mac. 只在全息演示时看手势，画面不离开本机。</string>
-<key>NSAppleEventsUsageDescription</key><string>Jarvis adds itself to Login Items when you ask it to open at login. 用于设置开机自动打开。</string>
 </dict></plist>

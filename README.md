@@ -64,7 +64,7 @@ python3 app/launch.py       # 打开窗口；语音服务随窗口启动和退�
 ```
 jarvis/            语音服务：唤醒、识别、回声消除、合成、大脑、工具
   plugins/         可选插件：mihome amap harness creator demos earth earth_migration
-  platforms/       Mac / Windows 差异：摄像头、手势识别、文字识别、开机启动
+  platforms/       Mac / Windows 差异：摄像头、手势识别、文字识别
 hud/               界面：index.html + css/ + js/（按顺序加载）+ demos/
 app/               启动器、首次安装、窗口、模型清单
 platform/mac|win   打包脚本
