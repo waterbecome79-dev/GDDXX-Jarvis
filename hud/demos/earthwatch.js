@@ -1,7 +1,7 @@
 /* 地球此刻 · EARTH, RIGHT NOW: a globe with six live cards about the world around the user.
    Every card answers a question somebody actually asks, for where they are (home from the AMap home address):
    flights near you and flight lookup · space-station passes you can see tonight · earthquakes nearest you ·
-   typhoons and how far they are · world news hot spots · next rocket launch · wind · aurora and solar storms.
+   typhoons and how far they are · world news hot spots · next rocket launch.
    Data comes from jarvis/plugins/earth.py (public feeds fetched on this computer). Coverage limits are written on screen.
    Own WebGL canvas above the HUD, DOM cards in two columns that scroll, an SVG for the lines.
    install(ctx) -> { command, data, frame, hand, hand2, hide, live, state }. */
@@ -1214,7 +1214,7 @@ export function install(ctx) {
     if (!ST.on || ST.ending || e.metaKey || e.ctrlKey || e.altKey) return;
     if (/input|textarea/i.test((document.activeElement || {}).tagName || '')) return;
     if (ST.mode === 'card' && (e.key === 'Escape' || e.key === 'Backspace')) { e.preventDefault(); e.stopImmediatePropagation(); close(); return; }
-    const n = +e.key; if (n >= 1 && n <= 8) { e.preventDefault(); e.stopImmediatePropagation(); open(n - 1); }
+    const n = +e.key; if (n >= 1 && n <= CARDS.length) { e.preventDefault(); e.stopImmediatePropagation(); open(n - 1); }
   }, true);
 
   /* ------------------------------------------------------------------ hand: point at a card, pinch to open; a held fist goes back */

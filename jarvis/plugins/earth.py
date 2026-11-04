@@ -8,7 +8,6 @@ Every card answers a question somebody actually asks, for where they are:
   4 storms    "Will the typhoon reach me?"                              GDACS current tropical cyclones, distance from home
   5 news      "What is the world talking about right now?"              GDELT 2.0 15-minute event exports (last hour)
   6 launch    "When is the next launch, and where can I watch?"         Launch Library 2, China first
-  (wind and aurora cards were dropped: f_wind/f_aurora are kept, unused.)
 
 The show lives in the HUD (hud/demos/earthwatch.js); this module fetches on this computer and pushes {"type": "earth_data", "card": ...}.
 Numbers are the feeds' own; a feed that fails says so. Coverage limits are stated on screen (e.g. ADS-B has no ground
@@ -30,9 +29,9 @@ ALIASES = {
     "news": ["新闻", "热点", "news", "headline"],
     "launch": ["火箭", "发射", "rocket", "launch"],
 }
-ORDINALS = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8,
-            "first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8}
-FRESH = {"flights": 120, "stations": 3 * 3600, "quakes": 180, "storms": 1800, "news": 900, "launch": 1800, "wind": 3 * 3600, "aurora": 900}
+ORDINALS = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6,
+            "first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6}
+FRESH = {"flights": 120, "stations": 3 * 3600, "quakes": 180, "storms": 1800, "news": 900, "launch": 1800}
 from ..paths import DATA
 from .. import config
 CACHE = DATA / "earth"
@@ -65,7 +64,7 @@ def card_of(text):
     t = (text or "").strip().lower()
     if t in CARDS:
         return t
-    m = re.search(r"(?:第|number |no\.?\s*|card |#)\s*([1-8一二两三四五六七八])", t) or re.fullmatch(r"\s*([1-8])\s*", t)
+    m = re.search(r"(?:第|number |no\.?\s*|card |#)\s*([1-6一二两三四五六])", t) or re.fullmatch(r"\s*([1-6])\s*", t)
     if m:
         v = m.group(1)
         n = int(v) if v.isdigit() else ORDINALS.get(v, 0)
@@ -168,7 +167,7 @@ def tool():
                        "action 'show' = the wall; 'open' needs card (name or 1-6); 'flight' needs flight (e.g. MU5101); 'close' back to the wall; 'hide'.",
         "parameters": {"type": "object", "properties": {
             "action": {"type": "string", "enum": ["show", "open", "flight", "close", "hide"]},
-            "card": {"type": "string", "description": "for 'open': " + ", ".join(CARDS) + " or 1-8"},
+            "card": {"type": "string", "description": "for 'open': " + ", ".join(CARDS) + f" or 1-{len(CARDS)}"},
             "flight": {"type": "string", "description": "for 'flight': the flight number as said, e.g. MU5101, 东航5101, CES5101"}}}}}
 
 
@@ -900,95 +899,6 @@ def f_launch():
     return {"count": len(out), "l": out, "cn": cn[:4], "src": "Launch Library 2", "note": "全球未来约 30 次发射（全世界一周大约 5~6 次）。时间以官方公布为准，经常推迟"}
 
 
-# ================================================================ 7 wind
-def f_wind():
-    h = home()
-    lats = list(range(-70, 71, 10)); lons = list(range(-180, 180, 15))
-    pts = [(la, lo) for la in lats for lo in lons]
-    vals = {}
-    for k in range(0, len(pts), 90):
-        chunk = pts[k:k + 90]
-        url = "https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode({
-            "latitude": ",".join(str(a) for a, _ in chunk), "longitude": ",".join(str(b) for _, b in chunk),
-            "current": "wind_speed_10m,wind_direction_10m", "wind_speed_unit": "ms"})
-        d = _json(url, 40)
-        rows = d if isinstance(d, list) else [d]
-        for (la, lo), r in zip(chunk, rows):
-            c = r.get("current") or {}
-            if c.get("wind_speed_10m") is not None:
-                vals[(la, lo)] = (c["wind_speed_10m"], c["wind_direction_10m"])
-    grid = []
-    for la in lats:
-        for lo in lons:
-            s, dd = vals.get((la, lo), (0, 0))
-            rad = math.radians(dd)                                # the direction the wind comes FROM
-            grid += [round(-s * math.sin(rad), 2), round(-s * math.cos(rad), 2)]   # u (east), v (north) it blows TOWARD
-    local = None
-    try:
-        from . import amap
-        w = amap.weather()
-        local = {"text": w.get("wind", ""), "temp": w.get("temp"), "now": w.get("now"), "city": w.get("city"), "src": "高德天气"}
-    except Exception:
-        pass
-    if not local:
-        try:
-            c = _json("https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode({"latitude": h["lat"], "longitude": h["lon"],
-                      "current": "wind_speed_10m,wind_direction_10m,wind_gusts_10m", "wind_speed_unit": "ms"}), 20).get("current") or {}
-            local = {"ms": c.get("wind_speed_10m"), "from": dir8(c.get("wind_direction_10m") or 0), "gust": c.get("wind_gusts_10m"), "src": "Open-Meteo"}
-        except Exception:
-            pass
-    strongest = max(((math.hypot(grid[i * 2], grid[i * 2 + 1]), i) for i in range(len(pts))), default=(0, 0))
-    return {"count": len(vals), "lats": lats, "lons": lons, "g": grid, "local": local, "home": {k: h[k] for k in ("lat", "lon", "name")},
-            "max": {"ms": round(strongest[0], 1), "lat": pts[strongest[1]][0], "lon": pts[strongest[1]][1]},
-            "src": "Open-Meteo", "note": "全球 10 米高度风场，经纬 10°×15° 网格（粗网格，看大势用）"}
-
-
-# ================================================================ 8 aurora / solar storms
-def _rows(d):
-    """SWPC products come as a list of lists with a header row, or (newer) a list of dicts."""
-    if isinstance(d, list) and d and isinstance(d[0], list):
-        head = [str(x) for x in d[0]]
-        return [dict(zip(head, r)) for r in d[1:]]
-    return d if isinstance(d, list) else []
-
-
-def f_aurora():
-    now = _rows(_json("https://services.swpc.noaa.gov/json/planetary_k_index_1m.json"))
-    kp = None
-    for r in reversed(now):
-        v = r.get("estimated_kp", r.get("kp_index", r.get("Kp")))
-        if v is not None:
-            kp = float(v); break
-    fc = []
-    try:
-        for r in _rows(_json("https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json")):
-            v = r.get("kp", r.get("Kp")); t = r.get("time_tag")
-            if v is None or not t:
-                continue
-            tt = calendar.timegm(time.strptime(str(t)[:19].replace("T", " "), "%Y-%m-%d %H:%M:%S"))
-            if tt > time.time() - 3 * 3600:
-                fc.append([tt * 1000, float(v), str(r.get("observed", r.get("noaa_scale", "")) or "")])
-    except Exception as e:
-        log(f"aurora forecast: {type(e).__name__}: {str(e)[:80]}")
-    ov = _json("https://services.swpc.noaa.gov/json/ovation_aurora_latest.json", 40)
-    pts = [[c[0] if c[0] <= 180 else c[0] - 360, c[1], c[2]] for c in ov.get("coordinates") or [] if len(c) >= 3 and c[2] >= 4]
-    h = home()
-    gmlat = _geomag_lat(h["lat"], h["lon"])
-    need = max(0, min(9, round((66.5 - abs(gmlat)) / 2.5)))        # rough rule of thumb: the oval reaches ~66.5° - 2.5° per Kp
-    storm = "G" + str(int(kp) - 4) if kp is not None and kp >= 5 else ""
-    peak = max(fc, key=lambda x: x[1]) if fc else None
-    return {"count": len(pts), "kp": kp, "storm": storm, "fc": fc[:24], "peak": peak, "ov": pts, "ovt": ov.get("Forecast Time") or "",
-            "home": {k: h[k] for k in ("lat", "lon", "name")}, "gmlat": round(gmlat, 1), "need": need,
-            "src": "NOAA SWPC", "note": "Kp 0-9，5 以上是地磁暴（G1-G5）。“需要 Kp 几”按地磁纬度经验估算，只是参考"}
-
-
-def _geomag_lat(lat, lon):
-    """Geomagnetic (dipole) latitude; pole near 80.7N 72.7W (IGRF, 2025)."""
-    pl, po = math.radians(80.7), math.radians(-72.7)
-    la, lo = math.radians(lat), math.radians(lon)
-    return math.degrees(math.asin(math.sin(la) * math.sin(pl) + math.cos(la) * math.cos(pl) * math.cos(lo - po)))
-
-
 # ================================================================ plumbing
 FETCH = {"flights": f_flights, "stations": f_stations, "quakes": f_quakes, "storms": f_storms, "news": f_news,
          "launch": f_launch}
@@ -1080,6 +990,9 @@ def summary(key=None):
 
 def selftest():
     assert card_of("3") == "quakes" and card_of("第二张") == "stations" and card_of("open the third card") == "quakes"
+    assert card_of("6") == "launch" and card_of("第六张") == "launch" and card_of("open the sixth card") == "launch"
+    assert card_of("7") is None and card_of("8") is None and card_of("第七张") is None and card_of("第八张") is None
+    assert card_of("open the seventh card") is None and card_of("card 8") is None
     assert card_of("打开航班") == "flights" and card_of("台风") == "storms" and card_of("今晚能看到空间站吗") == "stations"
     assert card_of("show me the planet") is None and card_of("today") is None and card_of("头顶的卫星") == "stations" and card_of("星链") == "stations"
     assert flight_in("MU5101飞到哪了") == "MU5101" and flight_in("where is flight ca 981 now") == "CA981" and flight_in("东航5101") == "MU5101"
@@ -1094,7 +1007,9 @@ def selftest():
     el = {"i": math.radians(51.6), "raan": 0, "argp": 0, "M": 0, "e": 0.0005, "n": 15.5, "ndot": 0, "ep": 0}
     r = math.sqrt(sum(x * x for x in sat_eci(el, 0)))
     assert 6700 < r < 6800, r
-    assert abs(_geomag_lat(80.7, -72.7) - 90) < 0.01
+    assert set(FETCH) == set(CARDS) and all(1 <= n <= len(CARDS) for n in ORDINALS.values())
+    desc = tool()["function"]["parameters"]["properties"]["card"]["description"]
+    assert f"1-{len(CARDS)}" in desc and "1-8" not in desc
     print("earthwatch selftest ok")
 
 
