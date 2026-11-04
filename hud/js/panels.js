@@ -42,13 +42,14 @@ function renderReport() {
   $('#gaugeArc').style.strokeDashoffset = (226.2 * (1 - pct / 100)).toFixed(1);
   animateNum($('#gaugeNum'), pct); $('#doneNum').textContent = done;
   $('#segs').innerHTML = Array.from({ length: 8 }, (_, i) => `<i class="${i < Math.floor(pct / 12.5) ? 'on' : i === Math.floor(pct / 12.5) ? 'half' : ''}"></i>`).join('');
-  if (liveTasks) $('#tasks').innerHTML = liveTasks.length ? liveTasks.map(([n, w, c]) => `<li class="${c}"><i></i><span>${escapeHtml(n)}</span><b style="font-size:12.5px">${w}</b></li>`).join('') : '<li class="new"><i></i><span style="color:var(--ink-3)">还没有任务，告诉我今天要做什么</span><b></b></li>';
-  else $('#tasks').innerHTML = TASKS.map(([n, p]) => `<li class="${p === 100 ? 'ok' : p >= 70 ? 'go' : p >= 40 ? 'slow' : 'new'}"><i></i><span>${n}</span><b>${p}%</b></li>`).join('');
+  const emptyTasks = '<li class="new"><i></i><span style="color:var(--ink-3)">还没有任务，告诉我今天要做什么</span><b></b></li>';
+  if (liveTasks) $('#tasks').innerHTML = liveTasks.length ? liveTasks.map(([n, w, c]) => `<li class="${c}"><i></i><span>${escapeHtml(n)}</span><b style="font-size:12.5px">${w}</b></li>`).join('') : emptyTasks;
+  else $('#tasks').innerHTML = TASKS.length ? TASKS.map(([n, p]) => `<li class="${p === 100 ? 'ok' : p >= 70 ? 'go' : p >= 40 ? 'slow' : 'new'}"><i></i><span>${n}</span><b>${p}%</b></li>`).join('') : emptyTasks;
 }
 function animateNum(el, to) { const from = +el.textContent || 0; const t0 = performance.now(); (function s(now) { const k = Math.min(1, (now - t0) / 1200); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(s); })(t0); }
 renderReport();
 
-let SCHED = [['09:00', '09:30', '团队站会', '项目进展与重点对齐'], ['09:30', '11:00', '方案评审', '贾维斯交互方案讨论'], ['11:00', '12:00', '深度研究', '多模态模型调研'], ['13:30', '15:00', '开发迭代', 'Agent 工具链集成'], ['15:30', '16:30', '项目复盘', '里程碑与风险梳理'], ['17:00', '18:00', '文档整理', '技术文档与下一步计划']];
+let SCHED = [];          // real day plan arrives via applySchedule; empty until then
 const toMin = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
 function schedInfo() { const d = new Date(); const now = d.getHours() * 60 + d.getMinutes(); let cur = -1, next = -1; SCHED.forEach((s, i) => { if (now >= toMin(s[0]) && now < toMin(s[1])) cur = i; if (next < 0 && toMin(s[0]) > now) next = i; }); return { now, cur, next }; }
 let TODO = [];          // live items without a time
@@ -59,7 +60,7 @@ function renderSched() {
   const untimed = TODO.map(t => `<li class="${t.done ? 'past' : ''}"><i></i><span class="t">待办</span><span><b>${escapeHtml(t.title)}${t.done ? ' ✓' : ''}</b><span>${escapeHtml(t.note || '')}</span></span></li>`);
   $('#sched').innerHTML = timed.concat(untimed).join('') || '<li><i></i><span class="t">今天</span><span><b>还没有安排</b><span>说 “Hey Jarvis”，告诉我今天要做什么</span></span></li>';
 }
-/* the real day plan from the voice service replaces the demo data */
+/* the real day plan from the voice service fills the empty shell */
 function applySchedule(items) {
   const hm = m => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
   const timed = items.filter(x => x.start), now = new Date().getHours() * 60 + new Date().getMinutes();

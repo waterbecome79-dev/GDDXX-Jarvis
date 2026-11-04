@@ -25,8 +25,8 @@
     <div class="stats">
       <span>LOCAL<b class="on">● ON</b></span>
       <span>CPU<b id="cpu">--</b></span>
-      <span>MEM<b id="mem">57%</b></span>
-      <span>NET<b>⇅ <span id="net">6.1MB/s</span></b></span>
+      <span>MEM<b id="mem">--</b></span>
+      <span>NET<b><span id="net">--</span></b></span>
       <span id="batBox" hidden>BAT<b id="bat">--</b></span>
     </div>
     <span class="sep"></span>
@@ -49,9 +49,9 @@
         <h2>工作汇报 <span class="pip"></span><span class="plus" aria-hidden="true"></span></h2>
         <div class="report-top">
           <div class="gauge"><svg viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="36" fill="none" stroke="rgba(170,200,215,.13)" stroke-width="7"></circle><circle id="gaugeArc" cx="42" cy="42" r="36" fill="none" stroke="#7FDBFF" stroke-width="7" stroke-dasharray="226.2" stroke-dashoffset="226.2" stroke-linecap="butt" style="transition:stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1)"></circle></svg><b><span id="gaugeNum">0</span><small>%</small></b></div>
-          <div class="done"><span><b id="doneNum" style="font-weight:300">9</b> / <span id="totalNum">12</span><em>任务已完成</em></span><div class="segs" id="segs"></div></div>
+          <div class="done"><span><b id="doneNum" style="font-weight:300">0</b> / <span id="totalNum">0</span><em>任务已完成</em></span><div class="segs" id="segs"></div></div>
         </div>
-        <ul class="tasks" id="tasks"></ul>
+        <ul class="tasks" id="tasks"><li class="new"><i></i><span style="color:var(--ink-3)">还没有任务，告诉我今天要做什么</span><b></b></li></ul>
       </section>
       <section class="panel" aria-label="活动波形">
         <div class="wave-tabs" role="tablist" aria-label="波形来源">
@@ -71,16 +71,16 @@
       <section class="panel" id="pWeather" aria-label="天气与出行">
         <h2>天气与出行 <span class="pip"></span></h2>
         <div class="wx">
-          <div class="wx-now"><div class="wx-big"><b>18<span class="deg">°C</span></b><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3" aria-hidden="true"><circle cx="15.5" cy="8" r="3.2" stroke="#FFC27A"></circle><path d="M15.5 2.5v1.2M20.5 8h1.2M19 4.5l.9-.9" stroke="#FFC27A"></path><path d="M6 19.5h10a3.8 3.8 0 0 0 0-7.6 5.2 5.2 0 0 0-10 1.6A3 3 0 0 0 6 19.5z" stroke="currentColor" fill="rgba(220,239,247,.12)"></path></svg></div><span>多云</span><span class="meta"><span>上海</span><span>空气优</span><span>AQI 36</span></span></div>
+          <div class="wx-now"><div class="wx-big"><b>--<span class="deg">°C</span></b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z"></path></svg></div><span>等待天气</span><span class="meta"></span></div>
           <div class="wx-days">
-            <div>今天<svg viewBox="0 0 24 24" fill="rgba(220,239,247,.14)" stroke="currentColor" stroke-width="1.4"><path d="M7 18h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z"></path></svg><b>14°/22°</b></div>
-            <div>明天<svg viewBox="0 0 24 24" fill="none" stroke-width="1.4"><circle cx="15" cy="8" r="3" stroke="#FFC27A" fill="rgba(255,194,122,.25)"></circle><path d="M6 19h9a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.5 1.4A2.9 2.9 0 0 0 6 19z" stroke="currentColor" fill="rgba(220,239,247,.14)"></path></svg><b>16°/24°</b></div>
-            <div id="d3">周四<svg viewBox="0 0 24 24" fill="none" stroke="#FFC27A" stroke-width="1.4"><circle cx="12" cy="12" r="4" fill="rgba(255,194,122,.25)"></circle><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"></path></svg><b>18°/26°</b></div>
+            <div>今天<b>--</b></div>
+            <div>明天<b>--</b></div>
+            <div id="d3">--<b>--</b></div>
           </div>
         </div>
         <div class="trip">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 6.5h11.6l2.4 5.2c.9.4 1.3 1 1.3 1.9V18h-2.2v1.8h-2.6V18H7.3v1.8H4.7V18H2.5v-4.4c0-.9.4-1.5 1.3-1.9z" fill="#DCEFF7"></path><path d="M7.4 8.3h9.2l1.6 3.4H5.8z" fill="#0a1720"></path><circle cx="6.6" cy="14.7" r="1.3" fill="#0a1720"></circle><circle cx="17.4" cy="14.7" r="1.3" fill="#0a1720"></circle></svg>
-          <div><b>去 张江科学城</b><span>32 分钟<em></em>24 km</span></div>
+          <div><b>暂无行程</b><span>等待路线</span></div>
           <div class="eta"><span>预计抵达</span><b id="eta">--:--</b></div>
         </div>
         <canvas id="route" aria-label="通勤路线示意"></canvas>
@@ -111,7 +111,7 @@
     </div>
     <div class="meters-wrap">
       <div class="meters"><div class="meters" id="meters"></div><div class="globe" aria-hidden="true"><i></i><i></i><i></i><b></b></div></div>
-      <div class="demo-tag">界面原型 · 演示数据</div>
+      <div class="demo-tag">等待实时数据</div>
     </div>
   </footer>
 </div>
