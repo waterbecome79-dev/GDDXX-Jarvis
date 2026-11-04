@@ -24,6 +24,10 @@ FILLER = re.compile(r"^(?:[嗯啊哦呃额唉哎嗷噢 ]{1,3}|(?:um+|uh+|hmm+|mm
 STOP_WORDS = re.compile(r"^(?:停|停一下|停下|别说了|不用说了|闭嘴|好了|可以了|行了|算了|(?:okay|ok|alright)?[ ,]*(?:stop|wait|hold on|enough|that's enough|never mind|nevermind|cancel|shut up|be quiet|quiet|thanks|thank you|got it|okay|ok)(?:[ ,]+(?:jarvis|please|now|thanks|that's fine|it))*)[。.!！?？]*$", re.I)
 
 
+def _debug_heard():
+    return os.environ.get("JARVIS_DEBUG_HEARD", "1") == "1"
+
+
 class VoiceEngine:
     def __init__(self, on_event, *, follow_window=8.0, barge_ms=350, echo_ratio=0.6,
                  asr_fallback=True, max_segment=15.0, wake_trust=0.6, vad_tail=0.45, preroll=0.6, pad=0.25, wake=None, vad=None, asr=None):
@@ -128,7 +132,7 @@ class VoiceEngine:
             end = t - self.vad_tail
             start = end - len(core) / models.SR
             pre = self._span(max(0.0, start - self.pad), start)   # silero tends to clip the first syllable
-            if os.environ.get("JARVIS_DEBUG_HEARD", "1") == "1":
+            if _debug_heard():
                 print(f"vad seg {len(core) / models.SR:.2f}s (vad start {seg.start / models.SR:.2f}, est {start:.2f})", flush=True)
             self._on_segment(np.concatenate([pre, core]), start - len(pre) / models.SR, t)
 
@@ -177,7 +181,8 @@ class VoiceEngine:
         # the acoustic detector already fired, so near-misses of the name count too ("Hi, Travis")
         woke = woke or bool(NAME_LIKE.search(text)) or greet_wake(text)[0]   # claude-greet-wake
         ok = woke or self.kw_strong or self.wake_peak >= self.wake_trust
-        print(f"wake check: score {self.wake_peak:.2f}, heard {text!r} -> {'yes' if ok else 'no'}", flush=True)
+        if _debug_heard():
+            print(f"wake check: score {self.wake_peak:.2f}, heard {text!r} -> {'yes' if ok else 'no'}", flush=True)
         if ok and self._vp(self._span(max(0.0, self.woke_at - 1.6), t), "wake") is False:
             self._not_you("wake")
             ok = False
@@ -238,7 +243,7 @@ class VoiceEngine:
             if r.get("done") or r.get("error"):
                 self._reset()
             return
-        if os.environ.get("JARVIS_DEBUG_HEARD", "1") == "1":
+        if _debug_heard():
             print(f"segment {dur:.1f}s while {self.state}", flush=True)
         if self.state == "standby":
             # speech that never contained the wake phrase is dropped unheard,
@@ -250,7 +255,7 @@ class VoiceEngine:
             woke, cmd = split_wake(heard)
             if woke and dur > 3.0:
                 cmd = ""            # the command runs past what was transcribed; ask for it instead
-            if os.environ.get("JARVIS_DEBUG_HEARD", "1") == "1":
+            if _debug_heard():
                 print("heard (standby):", heard, flush=True)
                 self.emit("heard", {"text": heard})
             if not woke:
@@ -332,10 +337,11 @@ class VoiceEngine:
                     cmd = self._text(rest, mixed=True) if len(rest) > 0.3 * models.SR else ""
                     woke = True
                 if not woke:
-                    print("heard (wake rejected):", text, flush=True)
-                    if os.environ.get("JARVIS_DEBUG_HEARD", "1") == "1":
+                    dbg = (round(start,2), round(end,2), self.woke_at, text) if _debug_heard() else None
+                    if dbg is not None:
+                        print("heard (wake rejected):", text, flush=True)
                         self.emit("heard", {"text": text})
-                    self._event("rejected", {"heard": "(discarded)", "dbg": (round(start,2), round(end,2), self.woke_at, text) if __import__("os").environ.get("JV_DEBUG") else None})
+                    self._event("rejected", {"heard": "(discarded)", "dbg": dbg})
                     self._reset()
                     return
                 self._deliver(cmd, t)
