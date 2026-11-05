@@ -17,7 +17,8 @@ LEARN = MEMORY / "learning.json"
 RESERVED = {"set_screen", "control_home_device", "get_system_status", "manage_schedule", "read_creator_stats",
             "show_machine_hologram", "show_launch_sequence", "search_memory", "remember_fact", "forget_fact", "ask_harness", "harness_jobs",
             "note_cannot_do", "open_brain", "manage_abilities", "show_roadster_hover", "show_optimus_walk", "voiceprint",
-            "get_weather", "plan_route", "save_place"}         # built-in names a learned skill may not take over
+            "get_weather", "plan_route", "save_place",
+            "show_earth_now", "earth_migration"}         # built-in names a learned skill may not take over
 _loaded = {}       # path -> (mtime, module)
 
 
