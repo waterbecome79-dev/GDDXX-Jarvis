@@ -25,7 +25,7 @@ STOP_WORDS = re.compile(r"^(?:停|停一下|停下|别说了|不用说了|闭嘴
 
 
 def _debug_heard():
-    return os.environ.get("JARVIS_DEBUG_HEARD", "1") == "1"
+    return os.environ.get("JARVIS_DEBUG_HEARD", "0") == "1"
 
 
 class VoiceEngine:
@@ -63,15 +63,11 @@ class VoiceEngine:
         self.drop_before = None
         self.pending_ack = False    # wake confirmed while the user was still talking
         self.ring = np.zeros(int(30 * models.SR), np.float32)   # last 30 s, for onset padding
-        self.log = []
         self.voice = None           # voiceprint.Voiceprint, set by the service: only the user's voice counts
 
     # -- app hooks -------------------------------------------------------
     def now(self):
         return self.n / models.SR
-
-    def set_thinking(self):
-        self.state = "thinking"
 
     def set_speaking(self, on: bool, said: str = ""):
         """Jarvis started (on) or finished (off) talking. When it finishes on its own, the
@@ -147,7 +143,6 @@ class VoiceEngine:
 
     # -- transitions -----------------------------------------------------
     def _event(self, name, data):
-        self.log.append((round(self.now(), 2), name, data))
         self.emit(name, data)
 
     def _reset(self):
