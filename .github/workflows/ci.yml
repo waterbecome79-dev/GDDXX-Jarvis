@@ -11,11 +11,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, windows-latest, ubuntu-latest]
+        os: [macos-15, windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: {python-version: "3.12"}
       - name: Linux audio library
         if: runner.os == 'Linux'
@@ -37,10 +37,10 @@ jobs:
     # the 23 voice scenarios (synthetic speech in tests/clips_en) need the speech models: cached between runs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: {python-version: "3.12"}
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: models
           key: models-${{ hashFiles('app/models.json') }}
@@ -56,8 +56,8 @@ jobs:
   hud:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: {node-version: "22"}
       - run: npm i playwright@1.48.2 && npx playwright install --with-deps chromium
       - run: (cd hud && python3 -m http.server 8811 &) && sleep 2 && node tests/hud_check.js http://127.0.0.1:8811/index.html
@@ -69,15 +69,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - {os: macos-14, script: "bash platform/mac/build.sh arm64", out: "dist/*.dmg"}
+          - {os: macos-15, script: "bash platform/mac/build.sh arm64", out: "dist/*.dmg"}
           - {os: macos-15-intel, script: "bash platform/mac/build.sh x86_64", out: "dist/*.dmg"}
           - {os: windows-latest, script: "choco install innosetup -y --no-progress; powershell -ExecutionPolicy Bypass -File platform/win/build.ps1", out: "dist/*.exe"}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: ${{ matrix.script }}
         shell: bash
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with: {name: "jarvis-${{ matrix.os }}", path: "${{ matrix.out }}", if-no-files-found: error}
 
   install:
@@ -87,11 +87,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, macos-15-intel, windows-latest]
+        os: [macos-15, macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with: {name: "jarvis-${{ matrix.os }}", path: dist}
       - name: install from the .dmg and set up (first run)
         if: runner.os == 'macOS'
@@ -141,8 +141,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions: {contents: write}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with: {path: dist, merge-multiple: true}
       - name: publish the installers on the Releases page
         env: {GH_TOKEN: "${{ github.token }}"}
