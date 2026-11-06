@@ -2,18 +2,15 @@
 /* <<skins: 换肤 : 8 looks in the visual language of the 'Agent 战术大屏' project
    (github.com/CYBERDADDYLEO/agent-display): only the look is borrowed, all code here is our own.
    A skin = colour roles (CSS variables --sk-*, also SKC for canvas code) + core colours (uniforms uSkW/uSkC/uSkN, ribbon
-   colours) + a few CSS rules under body[data-skin] + an optional background layer. Layout, voice and features never change.
+   colours) + a few CSS rules under body[data-skin]. Layout, voice and features never change.
    Switch: menu > 皮肤, the T key, or the voice service sending {type:'skin', id|'next'}. The choice is remembered. */
 const SKIN_FONTS = document.createElement('style');
 SKIN_FONTS.textContent = `
 @font-face{font-family:'Michroma';font-weight:400;src:url(vendor/fonts/michroma-latin-400-normal.woff2) format('woff2')}
 @font-face{font-family:'Syncopate';font-weight:700;src:url(vendor/fonts/syncopate-latin-700-normal.woff2) format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-weight:500;src:url(vendor/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2')}
-#skinBg{position:fixed;inset:0;pointer-events:none;overflow:hidden;transition:opacity .8s}
-body.demo #skinBg{opacity:0}
 #gaugeArc{stroke:rgb(var(--sk-pri))}
 #lk stop{stop-color:rgb(var(--sk-pri))}
-#skinBg > *{position:absolute;inset:0}
 #skinPick{position:fixed;right:max(24px,2vw);top:62px;z-index:40;width:min(560px,calc(100vw - 48px));padding:14px;border:1px solid var(--line-2);
   background:rgba(var(--sk-pnl),.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 #skinPick[hidden]{display:none}
@@ -31,7 +28,7 @@ body.demo #skinBg{opacity:0}
   color:var(--ink);font-size:13px;letter-spacing:3px;opacity:0;transition:opacity .35s;pointer-events:none}
 #skinToast.on{opacity:1}
 
-/* ---------- 星环 · after NEURAL: an energy-cell HUD ring around the core, segmented headers, wide display face ---------- */
+/* ---------- 星环 · after NEURAL: segmented headers, wide display face ---------- */
 body[data-skin="ring"] .brand b,body[data-skin="ring"] .clock b{font-family:'Michroma',var(--f-latin);letter-spacing:3px}
 body[data-skin="ring"] .brand b{font-size:14px}
 body[data-skin="ring"] .clock b{font-size:21px;letter-spacing:1.5px}
@@ -39,13 +36,8 @@ body[data-skin="ring"] .panel h2{border-left:0;padding-left:16px;letter-spacing:
 body[data-skin="ring"] .panel h2::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:4px;
   background:repeating-linear-gradient(180deg,rgb(var(--sk-pri)) 0 3px,transparent 3px 5px);box-shadow:0 0 8px rgba(var(--sk-pri),.6)}
 body[data-skin="ring"] .panel h2::after{background:linear-gradient(90deg,rgba(var(--sk-pri),.55),rgba(var(--sk-pri),.12) 45%,transparent)}
-.sk-ring svg{position:absolute;left:50%;top:50%;width:min(96vh,62vw);height:min(96vh,62vw);transform:translate(-50%,-50%)}
-.sk-ring .rot{transform-origin:500px 500px;animation:skspin 240s linear infinite}
-.sk-ring .rot2{transform-origin:500px 500px;animation:skspin 160s linear infinite reverse}
-@keyframes skspin{to{transform:rotate(360deg)}}
-body.dormant .sk-ring{opacity:.55}
 
-/* ---------- 熔炉 · after FORGE: an event horizon in the core, molten-gold corner brackets, Syncopate ---------- */
+/* ---------- 熔炉 · after FORGE: molten-gold corner brackets, Syncopate ---------- */
 body[data-skin="forge"] .brand b,body[data-skin="forge"] .clock b{font-family:'Syncopate',var(--f-latin);font-weight:700;letter-spacing:4px}
 body[data-skin="forge"] .brand b{font-size:13px}
 body[data-skin="forge"] .clock b{font-size:20px;letter-spacing:2px}
@@ -56,17 +48,8 @@ body[data-skin="forge"] .panel::before{content:"";position:absolute;inset:-8px -
   linear-gradient(rgb(var(--sk-pri)),rgb(var(--sk-pri))) 0 100%/12px 1px no-repeat,linear-gradient(rgb(var(--sk-pri)),rgb(var(--sk-pri))) 0 100%/1px 12px no-repeat,
   linear-gradient(rgb(var(--sk-acc)),rgb(var(--sk-acc))) 100% 100%/12px 1px no-repeat,linear-gradient(rgb(var(--sk-acc)),rgb(var(--sk-acc))) 100% 100%/1px 12px no-repeat}
 body[data-skin="forge"] .panel h2::after{background:linear-gradient(90deg,rgba(var(--sk-acc),.5),rgba(var(--sk-pri),.15) 50%,transparent)}
-.sk-forge .hz{position:absolute;left:50%;top:50%;width:25vh;height:25vh;transform:translate(-50%,-50%);border-radius:50%;
-  background:radial-gradient(circle,#000 0 52%,rgba(0,0,0,.92) 60%,rgba(0,0,0,0) 71%);
-  box-shadow:0 0 0 1px rgba(var(--sk-acc),.35),0 0 24px 4px rgba(var(--sk-acc),.28),0 0 90px 20px rgba(var(--sk-acch),.12)}
-.sk-forge .hz::after{content:"";position:absolute;inset:-7%;border-radius:50%;border:1.5px solid rgba(var(--sk-accp),.55);filter:blur(1.2px);
-  box-shadow:0 0 18px rgba(var(--sk-acc),.55),inset 0 0 18px rgba(var(--sk-acc),.35);animation:skbreath 6s ease-in-out infinite}
-.sk-forge .lens{position:absolute;left:50%;top:50%;width:58vh;height:14vh;transform:translate(-50%,-50%) rotate(-8deg);border-radius:50%;
-  background:radial-gradient(ellipse,rgba(var(--sk-acc),.10),rgba(var(--sk-acch),.05) 45%,transparent 70%);filter:blur(4px)}
-@keyframes skbreath{50%{transform:scale(1.035);opacity:.8}}
-body.dormant .sk-forge .lens{opacity:.6}
 
-/* ---------- 回路 · after ION: a circuit floor under the core with ions racing along it, pad-and-trace headers ---------- */
+/* ---------- 回路 · after ION: pad-and-trace headers ---------- */
 body[data-skin="ion"] .brand b,body[data-skin="ion"] .clock b{font-family:'Syncopate',var(--f-latin);font-weight:700;letter-spacing:3px}
 body[data-skin="ion"] .brand b{font-size:13px}
 body[data-skin="ion"] .clock b{font-size:20px;letter-spacing:2px}
@@ -74,17 +57,8 @@ body[data-skin="ion"] .panel h2{border-left:0;padding-left:20px;letter-spacing:2
 body[data-skin="ion"] .panel h2::before{content:"";position:absolute;left:2px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;
   border:1.5px solid rgb(var(--sk-acc));box-shadow:0 0 8px rgba(var(--sk-acc),.7)}
 body[data-skin="ion"] .panel h2::after{left:6px;background:linear-gradient(90deg,rgba(var(--sk-acc),.7),rgba(var(--sk-pri),.35) 40%,transparent)}
-.sk-ion .floor{position:absolute;left:50%;bottom:-6vh;width:150vw;height:62vh;transform:translateX(-50%) perspective(70vh) rotateX(64deg);transform-origin:50% 100%;
-  -webkit-mask:linear-gradient(0deg,#000 30%,transparent);mask:linear-gradient(0deg,#000 30%,transparent)}
-.sk-ion .floor svg{width:100%;height:100%}
-.sk-ion .ion{animation:skion linear infinite}
-@keyframes skion{from{stroke-dashoffset:0}to{stroke-dashoffset:-1000}}
-body.dormant .sk-ion{opacity:.5}
 `;
 document.head.appendChild(SKIN_FONTS);
-const skinBg = Object.assign(document.createElement('div'), { id: 'skinBg' });
-skinBg.setAttribute('aria-hidden', 'true');
-$('#stage').after(skinBg);
 
 /* colour roles as r,g,b. pri = main hue, line = hairlines, soft = mid tone, hi = near-white tint, deep = haze, ink = light text tint,
    acc = second hue, accl = its light tone, acch = its hot tone, accp = its pale tone, bg / pnl / wbg = backgrounds,
@@ -136,55 +110,6 @@ function skMap(c, sk) {
   const warm = c[0] > c[2], base = warm ? SK_W0 : SK_C0, to = warm ? sk.core.warm : sk.core.cool;
   return c.map((v, k) => Math.min(1, v / Math.max(0.05, base[k]) * to[k]));
 }
-function skinBgBuild(kind) {
-  skinBg.innerHTML = '';
-  if (kind === 'ring') {
-    /* 72 sectors x 6 tracks of energy cells, a tick ring and a text band, two counter-rotating layers */
-    let cells = '';
-    for (let s = 0; s < 72; s++) for (let t = 0; t < 6; t++) {
-      const r0 = 405 + t * 13, r1 = r0 + 9, a0 = (s * 5 + 0.6) * Math.PI / 180, a1 = (s * 5 + 4.2) * Math.PI / 180;
-      const p = (r, a) => `${(500 + r * Math.cos(a)).toFixed(1)} ${(500 + r * Math.sin(a)).toFixed(1)}`;
-      cells += `<path data-s="${s}" data-t="${t}" d="M${p(r0, a0)}A${r0} ${r0} 0 0 1 ${p(r0, a1)}L${p(r1, a1)}A${r1} ${r1} 0 0 0 ${p(r1, a0)}Z"/>`;
-    }
-    let ticks = '';
-    for (let k = 0; k < 180; k++) { const a = k * 2 * Math.PI / 180, r0 = k % 15 ? 390 : 382; ticks += `<line x1="${500 + r0 * Math.cos(a)}" y1="${500 + r0 * Math.sin(a)}" x2="${500 + 396 * Math.cos(a)}" y2="${500 + 396 * Math.sin(a)}"/>`; }
-    skinBg.innerHTML = `<div class="sk-ring"><svg viewBox="0 0 1000 1000">
-      <defs><path id="skTxt" d="M500 500m-488 0a488 488 0 1 1 976 0a488 488 0 1 1 -976 0"/></defs>
-      <g class="rot"><g class="cells" fill="rgba(${SKC.pri},.07)" stroke="none">${cells}</g></g>
-      <g class="rot2" stroke="rgba(${SKC.pri},.35)" stroke-width="1">${ticks}<circle cx="500" cy="500" r="399" fill="none" stroke="rgba(${SKC.pri},.18)"/>
-        <text font-family="Michroma, sans-serif" font-size="11" letter-spacing="6" fill="rgba(${SKC.pri},.45)" stroke="none"><textPath href="#skTxt">J.A.R.V.I.S · NEURAL LINK · CORE SYNC · 72 × 6 · TOKEN FLOW · SYNAPSE BUS · HUD RING · STANDING BY · </textPath></text></g>
-      <circle cx="500" cy="500" r="486" fill="none" stroke="rgba(${SKC.acc},.25)" stroke-dasharray="2 10"/></svg></div>`;
-    const paths = [...skinBg.querySelectorAll('.cells path')], lvl = new Float32Array(72).fill(0.2);
-    let sweep = 0;
-    SK.tick = () => {                                   /* cells fill like a level meter per sector, a bright sweep runs around */
-      sweep = (sweep + 1) % 72;
-      const busy = /thinking|speaking|listening/.test(document.body.className) ? 0.35 : 0;
-      for (let s = 0; s < 72; s++) lvl[s] += ((Math.random() * (0.55 + busy) + 0.1) - lvl[s]) * 0.25;
-      paths.forEach(el => {
-        const s = +el.dataset.s, t = +el.dataset.t, on = t / 6 < lvl[s], hot = Math.abs(((s - sweep + 72) % 72)) < 3;
-        el.setAttribute('fill', hot && on ? `rgba(${SKC.acc},.6)` : on ? `rgba(${SKC.pri},${(0.09 + 0.22 * (1 - t / 6)).toFixed(2)})` : `rgba(${SKC.pri},.05)`);
-      });
-    };
-  } else if (kind === 'forge') {
-    skinBg.innerHTML = '';
-    SK.tick = null;
-  } else if (kind === 'ion') {
-    /* a circuit board seen at a slant: traces on a 40px grid with pads, ions racing along a few of them */
-    let tr = '', ions = '', pads = '';
-    const rnd = (() => { let x = 7; return () => (x = (x * 16807) % 2147483647) / 2147483647; })();
-    for (let k = 0; k < 46; k++) {
-      let x = Math.round(rnd() * 50) * 40, y = 1000, d = `M${x} ${y}`;
-      for (let j = 0; j < 6; j++) { y -= 80 + Math.round(rnd() * 4) * 40; d += `L${x} ${y}`; if (rnd() < 0.6) { x += (rnd() < 0.5 ? -1 : 1) * 40 * (1 + Math.floor(rnd() * 3)); d += `L${x} ${y - 40}`; y -= 40; } }
-      tr += `<path d="${d}"/>`; pads += `<circle cx="${x}" cy="${y}" r="5"/>`;
-      if (k % 4 === 0) ions += `<path class="ion" d="${d}" stroke="rgba(${k % 8 ? SKC.acc : SKC.hi},.95)" stroke-width="3" stroke-dasharray="14 986" style="animation-duration:${(3 + rnd() * 5).toFixed(1)}s;animation-delay:-${(rnd() * 5).toFixed(1)}s"/>`;
-    }
-    skinBg.innerHTML = `<div class="sk-ion"><div class="floor"><svg viewBox="0 0 2000 1000" preserveAspectRatio="none">
-      <g fill="none" stroke="rgba(${SKC.pri},.4)" stroke-width="2">${tr}</g><g fill="none" stroke="rgba(${SKC.acc},.6)" stroke-width="2">${pads}</g>
-      <g fill="none" stroke-linecap="round" style="filter:drop-shadow(0 0 6px rgba(${SKC.acc},.9))">${ions}</g></svg></div></div>`;
-    SK.tick = null;
-  } else SK.tick = null;
-}
-setInterval(() => { if (SK.tick && !document.hidden && !document.body.classList.contains('demo')) SK.tick(); }, 450);
 
 /* ---- skin cores: a skin can replace the silk core with its own centrepiece. The silk core (fibers + sparkles) is hidden
    while one is active; holograms still dim it through U.uGain, standby through U.uDorm. ---- */
