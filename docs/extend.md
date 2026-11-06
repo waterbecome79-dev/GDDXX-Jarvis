@@ -66,8 +66,8 @@ plugins 文件夹里的模块会被自动发现。重开贾维斯，说 “Hey J
 
 ## 6. Mac 和 Windows 的差异
 
-只放在 `jarvis/platforms/`：`mac.py`（Vision 手势和文字识别、登录项）、`win.py`（开始菜单启动）、`generic.py`（MediaPipe、RapidOCR、OpenCV 摄像头）。
-其他代码不要判断操作系统，调用 `platforms.open_path / open_camera / hand_detector / ocr / autostart`。
+只放在 `jarvis/platforms/`：`mac.py`（Vision 手势和文字识别）、`win.py`（转用 generic 的摄像头、手势、文字识别和打开路径）、`generic.py`（MediaPipe、RapidOCR、OpenCV 摄像头）。
+其他代码不要判断操作系统，调用 `platforms.open_path / open_camera / hand_detector / ocr`。
 
 ## 测试
 

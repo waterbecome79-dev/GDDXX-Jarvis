@@ -1,5 +1,5 @@
-"""macOS: Apple's built-in Vision framework for hands and text (offline, fast on Apple silicon), AVFoundation for the
-camera permission, and a login item so Jarvis opens with the morning briefing."""
+"""macOS: Apple's built-in Vision framework for hands and text (offline, fast on Apple silicon) and AVFoundation for the
+camera permission."""
 import os
 import subprocess
 import time
@@ -111,14 +111,3 @@ def ocr(path):
         x, y, w, h = bb.origin.x, bb.origin.y, bb.size.width, bb.size.height
         boxes.append({"t": str(cand[0].string()).strip(), "x": x, "y": 1 - (y + h), "w": w, "h": h})
     return boxes
-
-
-def autostart(on=True):
-    """A login item for Jarvis.app (System Settings > General > Login Items)."""
-    app = os.environ.get("JARVIS_APP_BUNDLE", "/Applications/Jarvis.app")
-    if on:
-        script = f'tell application "System Events" to make login item at end with properties {{path:"{app}", hidden:false}}'
-    else:
-        script = 'tell application "System Events" to delete (every login item whose name is "Jarvis")'
-    r = subprocess.run(["osascript", "-e", script], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, timeout=30)
-    return {"ok": r.returncode == 0, "on": on, "error": r.stderr[-300:] if r.returncode else ""}
